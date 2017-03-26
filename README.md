@@ -13,4 +13,9 @@ Outline:
 - ????
 - Profit!
 	
-	
+## To get google maps api credentials
+
+- Follow directions at https://github.com/googlemaps/google-maps-services-python
+- Get an API key and save it as a text file called "googleapikey.txt" in a directory called "\GithubPrivates" next to "\Github"
+- Enable API services "Geocoding"
+- Don't forget to "pip install -U googlemaps"
