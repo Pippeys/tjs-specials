@@ -21,14 +21,11 @@ def get_gps_coords(location, api_key):
 
 	lat = places_result["results"][0]['geometry']['location']['lat']
 	lng = places_result["results"][0]['geometry']['location']['lng']
+	address = places_result["results"][0]['formatted_address']
 
-	print(json.dumps(places_result, indent=4))
-	print("\n########################################################################\n")
-	print(lat)
-	print("Longitude:")
-	print(lng)
+	#print(json.dumps(places_result, indent=4))
 
-	return lat, lng
+	return lat, lng, address
 
 
 def main():
@@ -37,8 +34,11 @@ def main():
 
 	location = input("What location are you looking for?:")
 
-	get_gps_coords(location, api_key)
-	#get_address(location, api_key)
+	lat, lng, addr = get_gps_coords(location, api_key)
+
+	print("Location: " + addr)
+	print("Latitude: " + str(lat))
+	print("Longitude: " + str(lng))
 
 
 if __name__ == "__main__":
