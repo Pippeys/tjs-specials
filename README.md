@@ -12,10 +12,23 @@ Outline:
 - Plot locations and pictures onto custom google map
 - ????
 - Profit!
-	
+
 ## To get google maps api credentials
 
 - Follow directions at https://github.com/googlemaps/google-maps-services-python
 - Get an API key and save it as a text file called "googleapikey.txt" in a directory called "\GithubPrivates" next to "\Github"
 - Enable API services "Geocoding"
 - Don't forget to "pip install -U googlemaps"
+
+
+## Running LocationFinder.py creates the list of trails
+
+- Be sure to have modules: bs4, urllib.request, csv, lxml
+
+
+
+## To-Do
+
+- Improve csv file to have multiple columns
+- Integrate google trends for popularity scaling
+- Retrieve star rating for trails
