@@ -7,8 +7,10 @@ def main():
 	printGreeting()
 
 def printGreeting():
-	print("Hi Ted!")	
+	print("Hi Ted!")
 
 def seeYouOnTheOtherSide():
 	main()
 
+def WelcomeToThisSide():
+	OTHER_SIDE()
