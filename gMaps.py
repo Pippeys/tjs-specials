@@ -17,14 +17,13 @@ def get_gps_coords(location, api_key):
 	gmaps = googlemaps.Client(key=api_key)
 
 	# Geocoding an address
-	geocode_result = gmaps.geocode(location)
+	places_result = gmaps.places(location)
 
-	lat = geocode_result[0]['geometry']['location']['lat']
-	lng = geocode_result[0]['geometry']['location']['lng']
+	lat = places_result["results"][0]['geometry']['location']['lat']
+	lng = places_result["results"][0]['geometry']['location']['lng']
 
-	print(json.dumps(geocode_result, indent=4))
+	print(json.dumps(places_result, indent=4))
 	print("\n########################################################################\n")
-	print("Latitude:")
 	print(lat)
 	print("Longitude:")
 	print(lng)
@@ -39,6 +38,7 @@ def main():
 	location = input("What location are you looking for?:")
 
 	get_gps_coords(location, api_key)
+	#get_address(location, api_key)
 
 
 if __name__ == "__main__":
