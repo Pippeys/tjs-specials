@@ -15,4 +15,5 @@ Outline:
 	
 ## To get google maps api credentials
 
-- 
+- Follow directions at https://github.com/googlemaps/google-maps-services-python 
+- Enable API services "Geocoding"
