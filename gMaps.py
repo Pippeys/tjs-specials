@@ -1,11 +1,11 @@
 import googlemaps
 from datetime import datetime
-import pprint, json
+import pprint, json, os
 
 
 # Get API key from file stored in GithubPrivates folder outside of Github repos
 
-with open("O:\\Users\\Theodore\\Documents\\GithubPrivates\\GoogleMapsAPIKeys.txt","r") as myfile:
+with open(os.getcwd() + "\\..\\..\\GithubPrivates\\googleapikey.txt","r") as myfile:
 	APIKey = myfile.read()
 
 gmaps = googlemaps.Client(key=APIKey)
