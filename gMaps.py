@@ -25,9 +25,9 @@ def get_gps_coords(location, api_key):
 	print(json.dumps(geocode_result, indent=4))
 	print("\n########################################################################\n")
 	print("Latitude:")
-	print(geocode_result[0]['geometry']['location']['lat'])
+	print(lat)
 	print("Longitude:")
-	print(geocode_result[0]['geometry']['location']['lng'])
+	print(lng)
 
 	return lat, lng
 
@@ -43,4 +43,3 @@ def main():
 
 if __name__ == "__main__":
 	main()
-	
