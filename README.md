@@ -13,4 +13,6 @@ Outline:
 - ????
 - Profit!
 	
-	
+## To get google maps api credentials
+
+- 
