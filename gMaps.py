@@ -28,11 +28,29 @@ def get_gps_coords(location, api_key):
 	return lat, lng, address
 
 
+# Remove keywords like "via" and "to" and only use the location name
+def clean_name(location):
+
+	via_loc = int(location.find(" via "))
+	to_loc = int(location.find(" to "))
+
+	if (via_loc != -1):
+		location = location[0:via_loc]
+
+	if (to_loc != -1):
+		location = location[to_loc + 4:]
+
+	return location
+
+
 def main():
 
 	api_key = get_api_key()
 
+	#just for testing
 	location = input("What location are you looking for?:")
+
+	location = clean_name(location)
 
 	lat, lng, addr = get_gps_coords(location, api_key)
 
