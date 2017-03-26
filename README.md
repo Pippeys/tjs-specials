@@ -11,3 +11,4 @@ Outline:
 	Plot locations and pictures onto custom google map
 	????
 	Profit!
+	
