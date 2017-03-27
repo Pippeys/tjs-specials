@@ -23,12 +23,13 @@ def write_csv (trail_list, rating_list):
         writer.writerows(zip(trail_list, rating_list))
 
 
-def star_rating():
+def star_rating(rating_data):
     rating_list = []
     for span in rating_data:
         rating = (span.text)
         rating_stars = [rating]
         rating_list.append(rating_stars)
+
     return rating_list
 
 
@@ -38,7 +39,7 @@ def main():
     trail_data = trail_soup.find_all('a', class_='link mobile-block')
     rating_data = trail_soup.find_all('span', itemprop='reviewRating')
     trail_list = build_list(trail_data)
-    write_csv(trail_list)
+    write_csv(trail_list, rating_list)
 
 
 
