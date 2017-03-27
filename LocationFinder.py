@@ -38,8 +38,11 @@ def main():
     trail_soup = bs.BeautifulSoup(trail_sauce, 'lxml')
     trail_data = trail_soup.find_all('a', class_='link mobile-block')
     rating_data = trail_soup.find_all('span', itemprop='reviewRating')
-    trail_list = build_list(trail_data)
-    write_csv(trail_list, rating_list)
+
+    for tag in rating_data:
+        print(tag.contents[3]["title"])
+    #print(rating_data)
+    # write_csv(trail_list, rating_list)
 
 
 
