@@ -5,6 +5,12 @@ This is a repository just for us to try out coordinating a project on Github
 ## Current Project Idea
 Camping locations webscraper
 
+###User Use:
+
+- For people looking to find new trails and campsites
+- Using an EXTREMELY advanced algorithm (lol) to find unpopular and highly rated locations  
+- Giving descriptions, locations, and pictures
+
 Outline:
 - Get picture + name of location from https://www.alltrails.com/us/california/backpacking
 - Get gps coordinates from name and google maps api
@@ -29,6 +35,5 @@ Outline:
 
 ## To-Do
 
-- Improve csv file to have multiple columns
 - Integrate google trends for popularity scaling
 - Retrieve star rating for trails

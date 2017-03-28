@@ -1,19 +1,21 @@
-['PCT: CA Section N - Belden to Burney Falls State park'],5
-['Wild Horse Trail'],5
-['Trail Canyon Falls'],5
-['Lost Horse Mine Loop Trail'],4
-['Hood Mountain Trail to Panoramic Ranch Trail Loop'],5
-['Otay Mountain'],4
-['Trail Canyon Falls'],5
-['Lost Horse Mine Loop Trail'],3
-['Eagle Rock via the PCT'],4
-['Vivian Creek Trail to San Gorgonio Peak'],5
-['Marion Mountain to San Jacinto'],5
-['Santa Cruz Trail - Upper Oso Campground to Happy Hollow'],3
-['Backbone Trail from Will Rogers to Stunt Road '],5
-['Mount Zion Loop - Sturtevant to Winter Creek Trails'],5
-['Rabbit Peak and Villager Peak Trail'],5
-['Indianhead Mountain via Borrego Palm Canyon'],4
-['Mount Whitney via Mount Whitney Trail'],5
-['Mount Whitney via Mount Whitney Trail'],5
-['Dripping Springs Campground Trail'],5
+,trail_list,rating_list
+0,Figueroa Mountain to Davy Brown Campsite Trail,4
+1,Trail Canyon Falls,5
+2,Mount Wilson via Chantry Flats,4
+3,Big Pine Flat Trail,5
+4,Trans-Catalina Trail,5
+5,Trail Canyon Falls,5
+6,Dripping Springs Campground Trail,5
+7,Cougar Crest Trail ,5
+8,Dripping Springs Campground Trail,4
+9,PCT: CA Section N - Belden to Burney Falls State park,5
+10,Wild Horse Trail,5
+11,Trail Canyon Falls,5
+12,Lost Horse Mine Loop Trail,4
+13,Hood Mountain Trail to Panoramic Ranch Trail Loop,5
+14,Otay Mountain,4
+15,Trail Canyon Falls,5
+16,Lost Horse Mine Loop Trail,3
+17,Eagle Rock via the PCT,4
+18,Vivian Creek Trail to San Gorgonio Peak,5
+19,Marion Mountain to San Jacinto,5
