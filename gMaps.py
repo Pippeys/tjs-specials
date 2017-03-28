@@ -41,7 +41,7 @@ def clean_name(location):
 	if (to_loc != -1):
 		location = location[to_loc + 4:]
 
-	return location
+	return location + ", CA"
 
 
 def generate_map(gps_coords):
