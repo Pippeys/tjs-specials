@@ -1,8 +1,6 @@
 import googlemaps
 from datetime import datetime
 import pprint, json, os
-import makeMap
-import csv
 
 
 # Get API key from file stored in GithubPrivates folder outside of Github repos
@@ -14,19 +12,20 @@ def get_api_key():
 	return api_key
 
 
-def get_gps_coords(location, api_key, gmaps_client):
+def get_gps_coords(location, api_key):
+
+	gmaps = googlemaps.Client(key=api_key)
 
 	# Geocoding an address
-	places_result = gmaps_client.places(location)
+	places_result = gmaps.places(location)
+
+	lat = places_result["results"][0]['geometry']['location']['lat']
+	lng = places_result["results"][0]['geometry']['location']['lng']
+	address = places_result["results"][0]['formatted_address']
 
 	#print(json.dumps(places_result, indent=4))
 
-	if (places_result["status"] == "OK"):
-		lat = places_result["results"][0]['geometry']['location']['lat']
-		lng = places_result["results"][0]['geometry']['location']['lng']
-		address = places_result["results"][0]['formatted_address']
-
-		return lat, lng, address
+	return lat, lng, address
 
 
 # Remove keywords like "via" and "to" and only use the location name
@@ -44,45 +43,20 @@ def clean_name(location):
 	return location
 
 
-def generate_map(gps_coords):
-
-	map = makeMap.Map()
-
-	for point in gps_coords:
-		map.add_point((point[0], point[1]))
-
-	with open("output.html", "w") as out:
-		print(map, file=out)
-
-
-def get_names_from_csv():
-
-	names = []
-	mycsv = csv.reader(open(".\\Trail_list.csv"))
-
-	for row in mycsv:
-		if (row):
-			names.append(row[0])
-
-	return names
-
-
 def main():
 
 	api_key = get_api_key()
-	gmaps = googlemaps.Client(key=api_key)
 
-	names = get_names_from_csv()
+	#just for testing
+	location = input("What location are you looking for?:")
 
-	gps_coords = []
-	for name in names:
-		coords = get_gps_coords(clean_name(name), api_key, gmaps)
-		if (coords):
-			gps_coords.append(coords)
+	location = clean_name(location)
 
-	print(gps_coords)
+	lat, lng, addr = get_gps_coords(location, api_key)
 
-	#generate_map(gps_coords)
+	print("Location: " + addr)
+	print("Latitude: " + str(lat))
+	print("Longitude: " + str(lng))
 
 
 if __name__ == "__main__":
