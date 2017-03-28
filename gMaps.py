@@ -82,7 +82,7 @@ def main():
 
 	print(gps_coords)
 
-	#generate_map(gps_coords)
+	generate_map(gps_coords)
 
 
 if __name__ == "__main__":
