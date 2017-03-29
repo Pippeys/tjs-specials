@@ -29,11 +29,11 @@ Outline:
 
 ## Running LocationFinder.py creates the list of trails
 
-- Be sure to have modules: bs4, urllib.request, csv, lxml
+- Be sure to have modules: bs4, urllib.request, csv, lxml, pandas
 
 
 
 ## To-Do
 
 - Integrate google trends for popularity scaling
-- Retrieve star rating for trails
+- Load more button 
