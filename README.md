@@ -5,7 +5,7 @@ This is a repository just for us to try out coordinating a project on Github
 ## Current Project Idea
 Camping locations webscraper
 
-###User Use:
+### User Use:
 
 - For people looking to find new trails and campsites
 - Using an EXTREMELY advanced algorithm (lol) to find unpopular and highly rated locations  
