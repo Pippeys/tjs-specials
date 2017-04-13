@@ -1,4 +1,4 @@
-# Jordan-[Scott](https://github.com/Pippeys)-[Ted](https://github.com/Sarulian) Test Repository
+# [Jordan](https://github.com/jecd)-[Scott](https://github.com/Pippeys)-[Ted](https://github.com/Sarulian) Test Repository
 
 This is a repository just for us to try out coordinating a project on Github
 
