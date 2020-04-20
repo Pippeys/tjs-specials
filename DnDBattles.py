@@ -113,9 +113,9 @@ class Monster:
                 continue
 
 
-class Alden:
-    def __init__(self,AC,Health):
-        pass
+class Character:
+    def __init__(self,):
+        self.load_from_char_sheet(Name,AC,Ini,)
 
 
 def Battle (Player,Monster,Player_Attack,Monster_Attack):
@@ -123,9 +123,11 @@ def Battle (Player,Monster,Player_Attack,Monster_Attack):
 
 
 def main():
-    Zombie = Monster('lion')
-    print(Zombie)
-    print(Zombie.attacks['Bite'])
+    monster = Monster('lion')
+    print(monster)
+    print('Attack Options: '+str(list(monster.attacks.keys())))
+    print(monster.attacks['Bite'])
+    print(monster.attacks['Bite'].attack())
 
 if __name__ == '__main__':
     main()

@@ -1,0 +1,12 @@
+{
+  "Name":"Alden The Altruist",
+  "Hit Points": 25,
+  "Strength":17,
+  "Dexterity":8,
+  "Constitution":13,
+  "Intelligence":10,
+  "Wisdom": 12,
+  "Charisma": 15,
+  "Initiative": -1,
+  "Armor Class": 16
+}
