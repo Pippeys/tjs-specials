@@ -164,8 +164,8 @@ def Battle (Player,Monster,Player_Attack,Monster_Attack):
 
 
 def main(monster,attack):
-    # test_monster = Monster(monster)
-    # test_monster.attack(attack)
+    test_monster = Monster(monster)
+    test_monster.attack(attack)
     Alden = Character('Alden The Altruist')
     print(vars(Alden))
 
@@ -173,7 +173,7 @@ def main(monster,attack):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Simulate DnD Monsters, Characters, and More!')
-    parser.add_argument('-m', '--monster', type=str, default='adult-black-dragon', help='the name of a monster to simulate')
-    parser.add_argument('-a', '--attack',  type=str, default='Tail',               help='the name of the monster\'s attack to simulate')
+    parser.add_argument('-m', '--monster', type=str, default='zombie', help='the name of a monster to simulate')
+    parser.add_argument('-a', '--attack',  type=str, default='Bite',               help='the name of the monster\'s attack to simulate')
     args = parser.parse_args()
     main(args.monster, args.attack)
