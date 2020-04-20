@@ -3,7 +3,7 @@ import random
 import re
 import requests
 from pprint import pprint
-
+import json
 
 class Roll:
 
@@ -127,8 +127,22 @@ class Monster:
 
 
 class Character:
-    def __init__(self,):
-        self.load_from_char_sheet(Name,AC,Ini,)
+    def __init__(self,Name):
+        self.load_from_char_sheet(Name)
+    def load_from_char_sheet(self,char_name):
+        with open('Alden.json') as f:
+            data = json.load(f)
+
+        self.Name = data['Name']
+        self.AC = data['Armor Class']
+        self.HP = data['Hit Points']
+        self.Init = data['Initiative']
+        self.Str = data['Strength']
+        self.Dex = data['Dexterity']
+        self.Con = data['Constitution']
+        self.Int = data['Intelligence']
+        self.Wis = data['Wisdom']
+        self.Cha = data['Charisma']
 
 
 def Battle (Player,Monster,Player_Attack,Monster_Attack):
@@ -136,8 +150,11 @@ def Battle (Player,Monster,Player_Attack,Monster_Attack):
 
 
 def main():
-    test_monster = Monster('lion')
-    test_monster.attack('Bit')
+    # test_monster = Monster('lion')
+    # test_monster.attack('Bite')
+    Alden = Character('Alden The Altruist')
+    print(vars(Alden))
+
 
 
 if __name__ == '__main__':
