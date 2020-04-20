@@ -5,6 +5,7 @@ import requests
 import argparse
 from pprint import pprint
 import json
+import statistics
 
 class Roll:
 
@@ -159,16 +160,41 @@ class Character:
         self.Cha = data['Charisma']
 
 
-def Battle (Player,Monster,Player_Attack,Monster_Attack):
-    pass
+def battle(aggressor, defender):
+    print("\n{} assalts {}!".format(aggressor.Name, defender.Name))
+    num_sims = 10000
+    ac = defender.AC
+    attacks = aggressor.attacks
+    print("    {}'s attacks = [{}]".format(aggressor.Name, ", ".join(list(attacks.keys()))))
+    print("    {}'s AC = {}".format(defender.Name, ac))
+
+    for attack in attacks:
+        totals = []
+        for i in range(num_sims):
+            to_hit, for_damage = attacks[attack].attack()
+            if to_hit >= ac:
+                totals.append(for_damage)
+            else:
+                totals.append(0)
+
+        print(attack)
+        print("    min: {}".format(min(totals)))
+        print("   mean: {}".format(int(sum(totals)/len(totals))))
+        print(" median: {}".format(statistics.median(totals)))
+        print("    max: {}".format(max(totals)))
+    print("")
 
 
 def main(monster,attack):
-    test_monster = Monster(monster)
-    test_monster.attack(attack)
-    Alden = Character('Alden The Altruist')
-    print(vars(Alden))
+    #test_monster = Monster(monster)
+    #test_monster.attack(attack)
+    #Alden = Character('Alden The Altruist')
+    #print(vars(Alden))
 
+    test_monster_1 = Monster("adult-copper-dragon")
+    test_monster_2 = Monster("adult-white-dragon")
+    battle(test_monster_1, test_monster_2)
+    battle(test_monster_2, test_monster_1)
 
 
 if __name__ == '__main__':
