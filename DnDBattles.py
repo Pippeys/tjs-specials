@@ -1,3 +1,4 @@
+import sys
 import random
 import re
 import requests
@@ -80,7 +81,7 @@ class Attack:
         return self.for_damage.roll()
 
     def __str__(self):
-        return "{}: To hit - 1d20+{}, Damage - {}+{}".format(self.name, self.to_hit_mod, self.damage_string, self.damage_mod)
+        return "{}: To hit=1d20+{}, Damage={}+{}".format(self.name, self.to_hit_mod, self.damage_string, self.damage_mod)
 
     def attack(self):
         return self.roll_to_hit(), self.roll_for_damage()
@@ -96,6 +97,18 @@ class Monster:
 
     def add_attack(self, name, attack):
         self.attacks[name] = attack
+
+    def attack(self, name):
+        if name in self.attacks:
+            print(self)
+            print(self.attacks[name])
+            print(self.attacks[name].attack())
+        else:
+            print("ERROR: Attack {} not found for {}".format(name, self.Name))
+            print("    Available attacks:")
+            for key in self.attacks.keys():
+                print("    --> {}".format(self.attacks[key]))
+            sys.exit()
 
     def load_from_api(self,api_index):
         url = 'http://www.dnd5eapi.co/api/monsters/'+api_index
@@ -123,11 +136,9 @@ def Battle (Player,Monster,Player_Attack,Monster_Attack):
 
 
 def main():
-    monster = Monster('lion')
-    print(monster)
-    print('Attack Options: '+str(list(monster.attacks.keys())))
-    print(monster.attacks['Bite'])
-    print(monster.attacks['Bite'].attack())
+    test_monster = Monster('lion')
+    test_monster.attack('Bit')
+
 
 if __name__ == '__main__':
     main()
