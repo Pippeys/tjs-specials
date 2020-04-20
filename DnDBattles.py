@@ -2,6 +2,7 @@ import sys
 import random
 import re
 import requests
+import argparse
 from pprint import pprint
 
 
@@ -16,9 +17,9 @@ class Roll:
         self.critical = False
 
     def parse_dice_string(self, dice_string):
-        roll_strings = dice_string.split("+")
+        roll_strings = dice_string.split('+')
         for roll_string in roll_strings:
-            self.dice.append([int(num) for num in roll_string.split("d")])
+            self.dice.append([int(num) for num in roll_string.split('d')])
 
     def make_critical(self):
         self.critical = True
@@ -39,9 +40,9 @@ class Roll:
 
     def __str__(self):
         result = self.roll()
-        dice_string = "+".join(["{}d{}".format(die_roll[0], die_roll[1]) for die_roll in self.dice])
-        dice_string += "+{}".format(self.mod)
-        return "{}: {} result = {}".format(self.name, dice_string, result)
+        dice_string = '+'.join(['{}d{}'.format(die_roll[0], die_roll[1]) for die_roll in self.dice])
+        dice_string += '+{}'.format(self.mod)
+        return '{}: {} result = {}'.format(self.name, dice_string, result)
 
 
 class Attack:
@@ -52,12 +53,12 @@ class Attack:
         self.damage_string = damage_string
         self.damage_mod = damage_mod
         self.to_hit = Roll(
-                "{} to hit".format(self.name),
-                "1d20",
+                '{} to hit'.format(self.name),
+                '1d20',
                 to_hit_mod
             )
         self.for_damage = Roll(
-                "{} for damage".format(self.name),
+                '{} for damage'.format(self.name),
                 damage_string,
                 damage_mod
             )
@@ -81,7 +82,7 @@ class Attack:
         return self.for_damage.roll()
 
     def __str__(self):
-        return "{}: To hit=1d20+{}, Damage={}+{}".format(self.name, self.to_hit_mod, self.damage_string, self.damage_mod)
+        return '{}: To hit=1d20+{}, Damage={}+{}'.format(self.name, self.to_hit_mod, self.damage_string, self.damage_mod)
 
     def attack(self):
         return self.roll_to_hit(), self.roll_for_damage()
@@ -104,15 +105,28 @@ class Monster:
             print(self.attacks[name])
             print(self.attacks[name].attack())
         else:
-            print("ERROR: Attack {} not found for {}".format(name, self.Name))
-            print("    Available attacks:")
+            print('ERROR: Attack {} not found for {}'.format(name, self.Name))
+            print('    Available attacks:')
             for key in self.attacks.keys():
-                print("    --> {}".format(self.attacks[key]))
+                print('    --> {}'.format(self.attacks[key]))
             sys.exit()
+
+    def search_all_monsters(self, api_index):
+        url = 'http://www.dnd5eapi.co/api/monsters'
+        results = requests.get(url).json()['results']
+        available_monsters = [result['index'] for result in results]
+        for monster in available_monsters:
+            if api_index.lower() in monster.lower():
+                print('    Partial match --> {}'.format(monster))
 
     def load_from_api(self,api_index):
         url = 'http://www.dnd5eapi.co/api/monsters/'+api_index
         response = requests.get(url).json()
+        if response == {'error': 'Not found'}:
+            print('ERROR: Monster {} not found in database'.format(api_index))
+            self.search_all_monsters(api_index)
+            sys.exit()
+
         self.AC = response['armor_class']
         self.Type = response['type']
         self.Name = response['name']
@@ -135,10 +149,14 @@ def Battle (Player,Monster,Player_Attack,Monster_Attack):
     pass
 
 
-def main():
-    test_monster = Monster('lion')
-    test_monster.attack('Bit')
+def main(monster, attack):
+    test_monster = Monster(monster)
+    test_monster.attack(attack)
 
 
 if __name__ == '__main__':
-    main()
+    parser = argparse.ArgumentParser(description='Simulate DnD Monsters, Characters, and More!')
+    parser.add_argument('-m', '--monster', type=str, default='adult-black-dragon', help='the name of a monster to simulate')
+    parser.add_argument('-a', '--attack',  type=str, default='Tail',               help='the name of the monster\'s attack to simulate')
+    args = parser.parse_args()
+    main(args.monster, args.attack)
