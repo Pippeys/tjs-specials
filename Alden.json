@@ -8,5 +8,34 @@
   "Wisdom": 12,
   "Charisma": 15,
   "Initiative": -1,
-  "Armor Class": 16
+  "Armor Class": 16,
+  "actions": [
+    {
+      "name":"Halberd",
+      "damage_type":"Slashing",
+      "attack_bonus":5,
+      "damage_dice":"1d10",
+      "damage_bonus":3
+    },
+    {
+      "name":"Halberd & Divine Smite",
+      "damage_type":"Radiant/Slashing",
+      "attack_bonus":5,
+      "damage_dice":"1d10+2d8",
+      "damage_bonus":3,
+      "additional_damage":{
+        "undead":"1d8"
+      }
+    },
+    {
+      "name":"Breath Weapon",
+      "damage_type":"Lightning",
+      "attack_bonus":1,
+      "damage_dice":"2d6",
+      "damage_bonus":0,
+      "additional_damage":{
+        "successful save":"1d6"
+    }
+  }
+  ]
 }
