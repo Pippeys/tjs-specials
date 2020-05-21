@@ -7,6 +7,12 @@ from pprint import pprint
 import json
 import statistics
 
+ANIMALS = [
+        "elk",
+        "constrictor-snake",
+        "wolf"
+    ]
+
 class Roll:
 
     def __init__(self, name, dice_string, mod):
@@ -48,8 +54,9 @@ class Roll:
 
 class Attack:
 
-    def __init__(self, name, to_hit_mod, damage_string, damage_mod, damage_type, has_advantage=False):
+    def __init__(self, name, desc, to_hit_mod, damage_string, damage_mod, damage_type, has_advantage=False):
         self.name = name
+        self.desc = desc
         self.to_hit_mod = to_hit_mod
         self.damage_string = damage_string
         self.damage_mod = damage_mod
@@ -69,6 +76,7 @@ class Attack:
         self.has_advantage = True
 
     def roll_to_hit(self):
+        crit = False
         to_hit_result = self.to_hit.roll()
 
         if self.has_advantage:
@@ -76,8 +84,9 @@ class Attack:
             to_hit_result = max([to_hit_result, second_roll])
 
         if to_hit_result == self.to_hit.max:
+            crit = True
             self.for_damage.make_critical()
-        return to_hit_result
+        return to_hit_result, crit
 
     def roll_for_damage(self):
         return self.for_damage.roll()
@@ -86,16 +95,16 @@ class Attack:
         return '{}: To hit=1d20+{}, Damage={}+{}'.format(self.name, self.to_hit_mod, self.damage_string, self.damage_mod)
 
     def attack(self):
-        return self.roll_to_hit(), self.roll_for_damage()
+        return self.roll_to_hit()[0], self.roll_to_hit()[1], self.roll_for_damage()
 
 
 class Monster:
-    def __init__(self,Name):
+    def __init__(self, name):
         self.attacks={}
-        self.load_from_api(Name)
+        self.load_from_api(name)
     # Function with in a class is a method
     def __str__(self):
-        return 'Monster: {}, AC={}, Type={}'.format(self.Name,self.AC,self.Type)
+        return 'Monster: {}, AC={}, Type={}'.format(self.name, self.ac, self.type)
 
     def add_attack(self, name, attack):
         self.attacks[name] = attack
@@ -120,7 +129,7 @@ class Monster:
             if api_index.lower() in monster.lower():
                 print('    Partial match --> {}'.format(monster))
 
-    def load_from_api(self,api_index):
+    def load_from_api(self, api_index):
         url = 'http://www.dnd5eapi.co/api/monsters/'+api_index
         response = requests.get(url).json()
         if response == {'error': 'Not found'}:
@@ -128,15 +137,24 @@ class Monster:
             self.search_all_monsters(api_index)
             sys.exit()
 
-        self.AC = response['armor_class']
-        self.Type = response['type']
-        self.Name = response['name']
-        self.Health = response['hit_points']
+        self.ac = response['armor_class']
+        self.type = response['type']
+        self.name = response['name']
+        self.hp = response['hit_points']
 
         for i in response['actions']:
             try:
-                self.add_attack(i['name'], Attack(i['name'],i['attack_bonus'],i['damage'][0]['damage_dice'],
-                       i['damage'][0]['damage_bonus'],i['damage'][0]['damage_type']['name']))
+                self.add_attack(
+                        i['name'], 
+                        Attack(
+                            i['name'],
+                            i['desc'],
+                            i['attack_bonus'],
+                            i['damage'][0]['damage_dice'],
+                            i['damage'][0]['damage_bonus'],
+                            i['damage'][0]['damage_type']['name']
+                        )
+                    )
             except KeyError:
                 continue
 
@@ -185,6 +203,64 @@ def battle(aggressor, defender):
     print("")
 
 
+class Animal(Monster):
+    def __init__(self, name):
+        self.attacks={}
+        self.load_from_api(name)
+
+
+class Wolf(Animal):
+    def __init__(self):
+        self.attacks={}
+        self.load_from_api(name)
+
+
+class Pack:
+    def __init__(self, animal, size):
+        self.animals = []
+        for i in range(size):
+            self.animals.append(Animal(animal))
+        enemy_attr = {}
+        self.chosen_attack = None
+
+    def __str__(self):
+        return "\n".join([str(animal) for animal in self.animals])
+
+    def attack(self, ac):
+        total_dmg = 0
+        if self.chosen_attack is None:
+            print(self.animals[0])
+            if len(self.animals[0].attacks) == 1:
+                self.chosen_attack = self.animals[0].attacks[list(self.animals[0].attacks.keys())[0]]
+            else:
+                self.chosen_attack = prompt_user("attack", self.animals[0].attacks)
+
+        for animal in self.animals:
+            to_hit, is_crit, dmg = self.chosen_attack.attack()
+            if to_hit >= ac:
+                if is_crit:
+                    print("Critical!")
+                print("Hit! {} damage!".format(dmg))
+                total_dmg += dmg
+
+        return total_dmg
+
+
+def prompt_user(choice, options):
+    print("Choose a {}:".format(choice))
+    if type(options) == list:
+        for i, option in enumerate(options):
+            print("{} - {}".format(i, option))
+        index = input(": ")
+        return options[index]
+    elif type(options) == dict:
+        key_list = list(options.keys())
+        for i, key in enumerate(key_list):
+            print("{} - {}".format(i, key))
+        index = input(": ")
+        return options[key_list[i]]
+
+
 def main(monster,attack):
     #test_monster = Monster(monster)
     #test_monster.attack(attack)
@@ -199,8 +275,21 @@ def main(monster,attack):
 
 if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Simulate DnD Monsters, Characters, and More!')
-    parser.add_argument('-m', '--monster', type=str, default='adult-black-dragon', help='the name of a monster to simulate')
-    parser.add_argument('-a', '--attack',  type=str, default='Tail',               help='the name of the monster\'s attack to simulate')
+    parser.add_argument('-m', '--monster',      type=str, default='wolf', help='the name of an animal to simulate')
+    parser.add_argument('-s', '--size',         type=int, default=1,      help='how many animals in the pack?')
+    parser.add_argument('-ac', '--ac', type=int, default=10,     help='how many animals in the pack?')
     args = parser.parse_args()
-    main(args.monster, args.attack)
+
+    #for animal_name in ANIMALS:
+    #    animal = Animal(animal_name)
+    #    print(animal)
+    #    for name, attack in animal.attacks.items():
+    #        print("    {}: {}".format(name, attack))
+    #        print("        {}".format(attack.desc))
+
+    #    print("")
+
+    pack = Pack(args.monster, args.size)
+    dmg = pack.attack(args.ac)
+    print("Total damage = {}".format(dmg))
 
