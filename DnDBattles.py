@@ -186,15 +186,15 @@ def battle(aggressor, defender):
 
 
 def main(monster,attack):
-    #test_monster = Monster(monster)
-    #test_monster.attack(attack)
+    test_monster = Monster(monster)
+    test_monster.attack(attack)
     #Alden = Character('Alden The Altruist')
     #print(vars(Alden))
 
-    test_monster_1 = Monster("adult-copper-dragon")
-    test_monster_2 = Monster("adult-white-dragon")
-    battle(test_monster_1, test_monster_2)
-    battle(test_monster_2, test_monster_1)
+    # test_monster_1 = Monster("adult-copper-dragon")
+    # test_monster_2 = Monster("adult-white-dragon")
+    # battle(test_monster_1, test_monster_2)
+    # battle(test_monster_2, test_monster_1)
 
 
 if __name__ == '__main__':

@@ -15,7 +15,8 @@
       "damage_type":"Slashing",
       "attack_bonus":5,
       "damage_dice":"1d10",
-      "damage_bonus":3
+      "damage_bonus":3,
+      "action_type":"Melee"
     },
     {
       "name":"Halberd & Divine Smite",
@@ -23,6 +24,7 @@
       "attack_bonus":5,
       "damage_dice":"1d10+2d8",
       "damage_bonus":3,
+      "action_type":"Melee",
       "additional_damage":{
         "undead":"1d8"
       }
@@ -33,9 +35,20 @@
       "attack_bonus":1,
       "damage_dice":"2d6",
       "damage_bonus":0,
-      "additional_damage":{
+      "action_type":"Breath",
+      "additional_damage":
+        {
         "successful save":"1d6"
-    }
+        }
+      },
+      {
+        "name":"Bless",
+        "attack_bonus":1,
+        "dice":"2d6",
+        "action_type":"Enchantment",
+        "duration":"1 Minute"
+      }
+    ]
   }
   ]
 }
