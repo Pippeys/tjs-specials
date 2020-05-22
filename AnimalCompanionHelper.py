@@ -13,7 +13,7 @@ ANIMALS = [
     ]
 
 class MainWindow(QtWidgets.QMainWindow):
-    
+
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
         uic.loadUi("AnimalCompanionHelper.ui", self)
@@ -54,10 +54,30 @@ class MainWindow(QtWidgets.QMainWindow):
         animalName = self.inputAnimalName.currentText()
         animalNum  = self.inputAnimalNum.value()
         self.pack = dnd.Pack(animalName, animalNum)
+        info = self.pack.info
         animalInfo = pprint.pformat(self.pack.info)
-
+        pprint.pprint(animalInfo)
         #TODO format outputAnimalInfo better
-        self.outputAnimalInfo.setText(animalInfo)
+        animalCleanInfo = """Name: {}
+Armor Class: {}
+Hit Points: {}
+
+        STR     DEX     CON     INT     WIS     CHA
+         {}       {}        {}        {}         {}        {}
+
+
+        """.format(info["name"],
+                info["armor_class"],
+                info["hit_points"],
+                info["strength"],
+                info["dexterity"],
+                info["constitution"],
+                info["intelligence"],
+                info["wisdom"],
+                info["charisma"]
+        )
+
+        self.outputAnimalInfo.setText(animalCleanInfo)
 
         self.inputAttackName.clear()
         self.inputAttackName.addItems(list(self.pack.animals[0].attacks.keys()))
@@ -111,10 +131,9 @@ class MainWindow(QtWidgets.QMainWindow):
             return False
         else:
             return True
-        
+
 
 app = QtWidgets.QApplication(sys.argv)
 window = MainWindow()
 window.show()
 app.exec_()
-
