@@ -21,19 +21,15 @@ class Roll:
         self.parse_dice_string(dice_string)
         self.mod = mod
         self.max = sum([die_roll[1] for die_roll in self.dice]) + self.mod
-        self.critical = False
 
     def parse_dice_string(self, dice_string):
         roll_strings = dice_string.split('+')
         for roll_string in roll_strings:
             self.dice.append([int(num) for num in roll_string.split('d')])
 
-    def make_critical(self):
-        self.critical = True
-
-    def roll(self):
+    def roll(self, crit=False):
         total = self.mod
-        if self.critical:
+        if crit:
             dice = [[die_roll[0]*2, die_roll[1]] for die_roll in self.dice]
         else:
             dice = self.dice
@@ -42,7 +38,6 @@ class Roll:
             for die in range(die_roll[0]):
                 total += random.randint(1, die_roll[1])
 
-        self.critical = False
         return total
 
     def __str__(self):
@@ -54,53 +49,76 @@ class Roll:
 
 class Attack:
 
-    def __init__(self, name, desc, to_hit_mod, damage_string, damage_mod, damage_type, has_advantage=False):
+    def __init__(self, name, desc, to_hit_mod, damages, has_advantage=False, has_disadvantage=False):
         self.name = name
         self.desc = desc
+
         self.to_hit_mod = to_hit_mod
-        self.damage_string = damage_string
-        self.damage_mod = damage_mod
         self.to_hit = Roll(
                 '{} to hit'.format(self.name),
                 '1d20',
                 to_hit_mod
             )
-        self.for_damage = Roll(
-                '{} for damage'.format(self.name),
-                damage_string,
-                damage_mod
+
+        self.for_damage = []
+        for damage in damages:
+            self.for_damage.append(
+                {
+                    "roll": Roll(
+                        '{} for damage'.format(self.name),
+                        damage["damage_dice"],
+                        damage["damage_bonus"]
+                    ),
+                    "type": damage["damage_type"]["name"]
+                }
             )
-        self.has_advantage = has_advantage
+
+        self.has_advantage    = has_advantage
+        self.has_disadvantage = has_disadvantage
 
     def give_advantage(self):
         self.has_advantage = True
+
+    def give_disadvantage(self):
+        self.has_disadvantage = True
 
     def roll_to_hit(self):
         crit = False
         to_hit_result = self.to_hit.roll()
 
-        if self.has_advantage:
-            second_roll = self.to_hit.roll()
+        second_roll = self.to_hit.roll()
+        if self.has_advantage and self.has_disadvantage:
+            pass
+        elif self.has_advantage:
             to_hit_result = max([to_hit_result, second_roll])
+        elif self.has_disadvantage:
+            to_hit_result = min([to_hit_result, second_roll])
 
         if to_hit_result == self.to_hit.max:
             crit = True
-            self.for_damage.make_critical()
+
         return to_hit_result, crit
 
-    def roll_for_damage(self):
-        return self.for_damage.roll()
+    def roll_for_damage(self, crit=False):
+        dmg_list = []
+        for dmg_roll in self.for_damage:
+            dmg_list.append([dmg_roll["roll"].roll(crit), dmg_roll["type"]])
+        return dmg_list
 
     def __str__(self):
-        return '{}: To hit=1d20+{}, Damage={}+{}'.format(self.name, self.to_hit_mod, self.damage_string, self.damage_mod)
+        damage_str = [str(dmg["roll"]) for dmg in self.for_damage]
+        return '{}: To hit=1d20+{}, Damage={}'.format(self.name, self.to_hit_mod, damage_str)
 
     def attack(self):
-        return self.roll_to_hit()[0], self.roll_to_hit()[1], self.roll_for_damage()
+        to_hit_result, crit = self.roll_to_hit()
+        dmg = self.roll_for_damage(crit)
+        return to_hit_result, crit, dmg
 
 
 class Monster:
     def __init__(self, name):
         self.attacks={}
+        self.info = {}
         self.load_from_api(name)
     # Function with in a class is a method
     def __str__(self):
@@ -137,6 +155,7 @@ class Monster:
             self.search_all_monsters(api_index)
             sys.exit()
 
+        self.info = response
         self.ac = response['armor_class']
         self.type = response['type']
         self.name = response['name']
@@ -150,9 +169,7 @@ class Monster:
                             i['name'],
                             i['desc'],
                             i['attack_bonus'],
-                            i['damage'][0]['damage_dice'],
-                            i['damage'][0]['damage_bonus'],
-                            i['damage'][0]['damage_type']['name']
+                            i['damage']
                         )
                     )
             except KeyError:
@@ -209,12 +226,6 @@ class Animal(Monster):
         self.load_from_api(name)
 
 
-class Wolf(Animal):
-    def __init__(self):
-        self.attacks={}
-        self.load_from_api(name)
-
-
 class Pack:
     def __init__(self, animal, size):
         self.animals = []
@@ -222,28 +233,46 @@ class Pack:
             self.animals.append(Animal(animal))
         enemy_attr = {}
         self.chosen_attack = None
+        self.info = self.animals[0].info
 
     def __str__(self):
         return "\n".join([str(animal) for animal in self.animals])
 
-    def attack(self, ac):
+    def attack(self, attack_name, ac, advantage, disadvantage):
         total_dmg = 0
-        if self.chosen_attack is None:
-            print(self.animals[0])
-            if len(self.animals[0].attacks) == 1:
-                self.chosen_attack = self.animals[0].attacks[list(self.animals[0].attacks.keys())[0]]
-            else:
-                self.chosen_attack = prompt_user("attack", self.animals[0].attacks)
+        self.chosen_attack = self.animals[0].attacks[attack_name]
+        #if self.chosen_attack is None:
+        #    if len(self.animals[0].attacks) == 1:
+        #        self.chosen_attack = self.animals[0].attacks[list(self.animals[0].attacks.keys())[0]]
+        #    else:
+        #        self.chosen_attack = prompt_user("attack", self.animals[0].attacks)
 
+        if advantage:
+            self.chosen_attack.give_advantage()
+        if disadvantage:
+            self.chosen_attack.give_disadvantage()
+
+        damage_results = []
         for animal in self.animals:
-            to_hit, is_crit, dmg = self.chosen_attack.attack()
+            dmg_dict = {}
+            dmg_dict["dmg"] = []
+            to_hit, is_crit, dmgs = self.chosen_attack.attack()
+            dmg_dict["to_hit"] = to_hit
             if to_hit >= ac:
+                dmg_dict["hit"] = True
                 if is_crit:
-                    print("Critical!")
-                print("Hit! {} damage!".format(dmg))
-                total_dmg += dmg
+                    dmg_dict["crit"] = True
+                else:
+                    dmg_dict["crit"] = False
+                for dmg in dmgs:
+                    dmg_dict["dmg"].append({"dmg": dmg[0], "type": dmg[1]})
+                total_dmg += dmg[0]
+            else:
+                dmg_dict["hit"] = False
 
-        return total_dmg
+            damage_results.append(dmg_dict)
+
+        return damage_results
 
 
 def prompt_user(choice, options):
@@ -277,7 +306,9 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(description='Simulate DnD Monsters, Characters, and More!')
     parser.add_argument('-m', '--monster',      type=str, default='wolf', help='the name of an animal to simulate')
     parser.add_argument('-s', '--size',         type=int, default=1,      help='how many animals in the pack?')
-    parser.add_argument('-ac', '--ac', type=int, default=10,     help='how many animals in the pack?')
+    parser.add_argument('-ac', '--ac',          type=int, default=10,     help='how many animals in the pack?')
+    parser.add_argument('-a', '--advantage',    action="store_true",      help='how many animals in the pack?')
+    parser.add_argument('-d', '--disadvantage', action="store_true",      help='how many animals in the pack?')
     args = parser.parse_args()
 
     #for animal_name in ANIMALS:
@@ -290,6 +321,6 @@ if __name__ == '__main__':
     #    print("")
 
     pack = Pack(args.monster, args.size)
-    dmg = pack.attack(args.ac)
+    dmg = pack.attack(args.ac, args.advantage, args.disadvantage)
     print("Total damage = {}".format(dmg))
 
