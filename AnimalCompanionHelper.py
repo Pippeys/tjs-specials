@@ -5,10 +5,14 @@ from PyQt5 import uic
 import pprint
 
 ANIMALS = [
-        "elk",
+        "brown-bear",
         "constrictor-snake",
+        "dire-wolf",
         "draft-horse",
+        "elk",
         "flying-snake",
+        "giant-elk",
+        "giant-snake",
         "wolf"
     ]
 
@@ -42,6 +46,7 @@ class MainWindow(QtWidgets.QMainWindow):
         self.inputAnimalNum.setMinimum(1)
         self.inputAnimalNum.setValue(4)
         self.outputAnimalInfo.setReadOnly(True)
+        self.outputAnimalInfo.setCurrentFont(QtGui.QFont("Courier New", 8))
         self.outputAttack.setReadOnly(True)
         self.inputTargetAC.setValue(12)
 
@@ -58,23 +63,37 @@ class MainWindow(QtWidgets.QMainWindow):
         animalInfo = pprint.pformat(self.pack.info)
         pprint.pprint(animalInfo)
         #TODO format outputAnimalInfo better
+        speed_str  = ", ".join(["{} {}".format(k, v) for k, v in info["speed"].items()])
+        senses_str = ", ".join(["{} {}".format(k, v) for k, v in info["senses"].items()])
         animalCleanInfo = """Name: {}
 Armor Class: {}
-Hit Points: {}
+ Hit Points: {}
+      Speed: {}
 
-        STR     DEX     CON     INT     WIS     CHA
-         {}       {}        {}        {}         {}        {}
+        STR   DEX   CON   INT   WIS   CHA
+         {:2d}    {:2d}    {:2d}    {:2d}    {:2d}    {:2d}
+        ({})  ({})  ({})  ({})  ({})  ({})
+
+Senses: {}
 
 
         """.format(info["name"],
                 info["armor_class"],
                 info["hit_points"],
+                speed_str,
                 info["strength"],
                 info["dexterity"],
                 info["constitution"],
                 info["intelligence"],
                 info["wisdom"],
-                info["charisma"]
+                info["charisma"],
+                mod(info["strength"]),
+                mod(info["dexterity"]),
+                mod(info["constitution"]),
+                mod(info["intelligence"]),
+                mod(info["wisdom"]),
+                mod(info["charisma"]),
+                senses_str
         )
 
         self.outputAnimalInfo.setText(animalCleanInfo)
@@ -132,6 +151,8 @@ Hit Points: {}
         else:
             return True
 
+def mod(stat):
+    return "{:+}".format(int((stat-10)/2))
 
 app = QtWidgets.QApplication(sys.argv)
 window = MainWindow()
