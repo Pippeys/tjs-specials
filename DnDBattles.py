@@ -6,6 +6,7 @@ import argparse
 from pprint import pprint
 import json
 import statistics
+import copy
 
 ANIMALS = [
         "elk",
@@ -160,6 +161,8 @@ class Monster:
         self.type = response['type']
         self.name = response['name']
         self.hp = response['hit_points']
+        self.max_hp = response['hit_points']
+        pprint(response)
 
         for i in response['actions']:
             try:
@@ -228,9 +231,8 @@ class Animal(Monster):
 
 class Pack:
     def __init__(self, animal, size):
-        self.animals = []
-        for i in range(size):
-            self.animals.append(Animal(animal))
+        og_animal = Animal(animal)
+        self.animals = [copy.deepcopy(og_animal) for i in range(size)]
         enemy_attr = {}
         self.chosen_attack = None
         self.info = self.animals[0].info
@@ -241,11 +243,6 @@ class Pack:
     def attack(self, attack_name, ac, advantage, disadvantage):
         total_dmg = 0
         self.chosen_attack = self.animals[0].attacks[attack_name]
-        #if self.chosen_attack is None:
-        #    if len(self.animals[0].attacks) == 1:
-        #        self.chosen_attack = self.animals[0].attacks[list(self.animals[0].attacks.keys())[0]]
-        #    else:
-        #        self.chosen_attack = prompt_user("attack", self.animals[0].attacks)
 
         if advantage:
             self.chosen_attack.give_advantage()
@@ -254,6 +251,8 @@ class Pack:
 
         damage_results = []
         for animal in self.animals:
+            if animal.hp <= 0:
+                continue
             dmg_dict = {}
             dmg_dict["dmg"] = []
             to_hit, is_crit, dmgs = self.chosen_attack.attack()
@@ -273,6 +272,44 @@ class Pack:
             damage_results.append(dmg_dict)
 
         return damage_results
+
+    def apply_damage(self, dmg):
+        dmg_left = dmg
+        self.animals.sort(key=lambda x: x.hp)
+        for i, animal in enumerate(self.animals):
+            hp_left = animal.hp - dmg_left
+            if hp_left <= 0:
+                animal.hp = 0
+            else:
+                animal.hp = hp_left
+                return
+            dmg_left = -1*hp_left
+
+    def apply_heal(self, healing):
+        healing_left = healing
+        self.animals.sort(key=lambda x: x.hp)
+        for i, animal in enumerate(self.animals):
+            if animal.hp <= 0:
+                continue
+            healing_needed = animal.max_hp - animal.hp
+            if healing_left <= healing_needed:
+                animal.hp = animal.hp + healing_left
+                return
+            else:
+                animal.hp = animal.hp + healing_needed
+                healing_left = healing_left - healing_needed
+
+    def apply_damage_aoe(self, dmg):
+        self.animals.sort(key=lambda x: x.hp)
+        for i, animal in enumerate(self.animals):
+            animal.hp = max(0, animal.hp - dmg)
+
+    def apply_heal_aoe(self, healing):
+        self.animals.sort(key=lambda x: x.hp)
+        for i, animal in enumerate(self.animals):
+            if animal.hp <= 0:
+                continue
+            animal.hp = min(animal.max_hp, animal.hp + healing)
 
 
 def prompt_user(choice, options):

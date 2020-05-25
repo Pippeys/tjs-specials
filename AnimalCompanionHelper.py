@@ -3,6 +3,7 @@ import DnDBattles as dnd
 from PyQt5 import QtCore, QtGui, QtWidgets
 from PyQt5 import uic
 import pprint
+import re
 
 ANIMALS = [
         "brown-bear",
@@ -12,7 +13,8 @@ ANIMALS = [
         "elk",
         "flying-snake",
         "giant-elk",
-        "giant-snake",
+        "giant-frog",
+        "giant-constrictor-snake",
         "wolf"
     ]
 
@@ -54,17 +56,46 @@ class MainWindow(QtWidgets.QMainWindow):
         #
         self.buttonLoadPack.clicked.connect(self.loadPack)
         self.buttonAttack.clicked.connect(self.attack)
+        self.buttonDamage.clicked.connect(self.damage)
+        self.buttonHeal.clicked.connect(self.heal)
 
     def loadPack(self):
         animalName = self.inputAnimalName.currentText()
         animalNum  = self.inputAnimalNum.value()
         self.pack = dnd.Pack(animalName, animalNum)
+        self.formatAnimalInfo()
+
+        self.inputAttackName.clear()
+        self.inputAttackName.addItems(list(self.pack.animals[0].attacks.keys()))
+        self.outputAttack.clear()
+
+        self.outputHitPoints.clear()
+        self.outputHitPoints.setColumnCount(1)
+        self.outputHitPoints.setRowCount(len(self.pack.animals))
+        if self.inputMightySummoner.checkState():
+            self.applyMightySummoner()
+        self.updateHitPoints()
+
+    def updateHitPoints(self):
+        for i, animal in enumerate(self.pack.animals):
+            self.outputHitPoints.setItem(i, 0, QtWidgets.QTableWidgetItem(str(animal.hp)))
+
+    def applyMightySummoner(self):
+        extra_hp = 2 * int(self.pack.info["hit_dice"].split("d")[0])
+        for i, animal in enumerate(self.pack.animals):
+            animal.max_hp = animal.max_hp + extra_hp
+            animal.hp = animal.hp + extra_hp
+
+    def formatAnimalInfo(self):
         info = self.pack.info
-        animalInfo = pprint.pformat(self.pack.info)
-        pprint.pprint(animalInfo)
-        #TODO format outputAnimalInfo better
         speed_str  = ", ".join(["{} {}".format(k, v) for k, v in info["speed"].items()])
         senses_str = ", ".join(["{} {}".format(k, v) for k, v in info["senses"].items()])
+        try:
+            specials_str = "\n\n".join(["<b>{}</b>: {}<br><br>".format(d["name"], d["desc"]) for d in info["special_abilities"]])
+        except KeyError:
+            specials_str = "None<br>"
+        actions_str  = "\n\n".join(["<b>{}</b>: {}<br><br>".format(d["name"], d["desc"]) for d in info["actions"]])
+
         animalCleanInfo = """Name: {}
 Armor Class: {}
  Hit Points: {}
@@ -75,9 +106,8 @@ Armor Class: {}
         ({})  ({})  ({})  ({})  ({})  ({})
 
 Senses: {}
-
-
-        """.format(info["name"],
+    CR: {}/{}""".format(
+                info["name"],
                 info["armor_class"],
                 info["hit_points"],
                 speed_str,
@@ -93,14 +123,24 @@ Senses: {}
                 mod(info["intelligence"]),
                 mod(info["wisdom"]),
                 mod(info["charisma"]),
-                senses_str
+                senses_str,
+                str(float(info["challenge_rating"]).as_integer_ratio()[0]),
+                str(float(info["challenge_rating"]).as_integer_ratio()[1])
+            )
+
+        animalComplexInfo = """<html><p style="font-family:'Courier New';font-size:12px">
+_________________________________________________<br><br>
+{}
+_________________________________________________<br><br>
+{}
+<br>
+</p></html>""".format(
+                specials_str,
+                actions_str
         )
 
         self.outputAnimalInfo.setText(animalCleanInfo)
-
-        self.inputAttackName.clear()
-        self.inputAttackName.addItems(list(self.pack.animals[0].attacks.keys()))
-        self.outputAttack.clear()
+        self.outputAnimalInfo.append(animalComplexInfo)
 
     def attack(self):
         if not self.isLoaded():
@@ -117,11 +157,13 @@ Senses: {}
 
         dmg_results = self.pack.attack(attack, ac, adv, dis)
         dmg_totals = {}
+        total_hits = 0
         for result in dmg_results:
             self.outputAttack.append("{} attacks with {}...".format(self.pack.animals[0].name, attack))
             if result["hit"] == False:
                 self.outputAttack.append("    {} misses!".format(result["to_hit"]))
             else:
+                total_hits += 1
                 if result["crit"]:
                     self.outputAttack.append("    {} is a critical hit!".format(result["to_hit"]))
                 else:
@@ -135,10 +177,31 @@ Senses: {}
                         dmg_totals[dmg["type"]].append(dmg["dmg"])
 
         self.outputAttack.append("TOTALS:")
+        self.outputAttack.append("    Successful hits: {}".format(total_hits))
         for dmg_type, dmg in dmg_totals.items():
             self.outputAttack.append("    {}: {} damage".format(dmg_type, sum(dmg)))
 
-        self.outputAttack.append("\n{}".format(self.pack.chosen_attack.desc))
+        attack_desc = re.search(r".*(Hit: .*)", self.pack.chosen_attack.desc)
+        if attack_desc: 
+            self.outputAttack.append("\n{}".format(attack_desc.group(1)))
+
+    def damage(self):
+        if not self.isLoaded():
+            return
+        if self.inputDamageAOE.checkState():
+            self.pack.apply_damage_aoe(self.inputDamage.value())
+        else:
+            self.pack.apply_damage(self.inputDamage.value())
+        self.updateHitPoints()
+
+    def heal(self):
+        if not self.isLoaded():
+            return
+        if self.inputHealAOE.checkState():
+            self.pack.apply_heal_aoe(self.inputHeal.value())
+        else:
+            self.pack.apply_heal(self.inputHeal.value())
+        self.updateHitPoints()
 
     def isLoaded(self):
         if self.pack is None:
